@@ -1,0 +1,24 @@
+To finish bids formatting, you need to:
+1. Add a dataset_description.json file (Template provided below)
+2. Add a .bidsignore file (Template provided below)
+3. Add a README file
+
+Template for dataset_description.json:
+{
+    "Name": "xxxx",
+    "BIDSVersion": "1.15.0",
+    "DatasetType": "raw",
+    "GeneratedBy": [
+        {
+            "Name": "xxx",
+            "Version": "0.1.0"
+        }
+    ]
+}
+
+Tempalte for .bidsignore
+*.txt
+*.mat
+*.out
+*.err
+*.log

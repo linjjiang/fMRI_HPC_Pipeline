@@ -1,0 +1,79 @@
+{
+  "anat": {
+    "source": "sub-{subject}/ses-{session}/*T1w_MPR.nii.gz",
+    "dest": "sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_T1w.nii.gz"
+  },
+  "anat_json": {
+    "source": "sub-{subject}/ses-{session}/*T1w_MPR.json",
+    "dest": "sub-{subject}/ses-{session}/anat/sub-{subject}_ses-{session}_T1w.json"
+  },
+  "func": {
+    "source": "sub-{subject}/ses-{session}/*BOLD_{task}{run}_{direction}.nii.gz",
+    "dest": "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_bold.nii.gz"
+  },
+  "func_json": {
+    "source": "sub-{subject}/ses-{session}/*BOLD_{task}{run}_{direction}.json",
+    "dest": "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_bold.json",
+    "metadata": {
+      "TaskName": "{task}"
+    }
+  },
+  "sbref": {
+    "source": "sub-{subject}/ses-{session}/*BOLD_{task}{run}_{direction}_SBRef.nii.gz",
+    "dest": "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_sbref.nii.gz"
+  },
+  "sbref_json": {
+    "source": "sub-{subject}/ses-{session}/*BOLD_{task}{run}_{direction}_SBRef.json",
+    "dest": "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_sbref.json",
+    "metadata": {
+      "TaskName": "{task}"
+    }
+  },
+  "fmap": {
+    "source": "sub-{subject}/ses-{session}/*SpinEchoFieldMap_{direction}.nii.gz",
+    "dest": "sub-{subject}/ses-{session}/fmap/sub-{subject}_ses-{session}_dir-{direction}_epi.nii.gz"
+  },
+  "fmap_json": {
+    "source": "sub-{subject}/ses-{session}/*SpinEchoFieldMap_{direction}.json",
+    "dest": "sub-{subject}/ses-{session}/fmap/sub-{subject}_ses-{session}_dir-{direction}_epi.json",
+    "metadata": {
+      "IntendedFor": [
+        "ses-{session}/func/sub-{subject}_ses-{session}_task-WM_dir-AP_run-01_bold.nii.gz",
+        "ses-{session}/func/sub-{subject}_ses-{session}_task-WM_dir-PA_run-02_bold.nii.gz"
+      ]
+    }
+  },
+  "behav": {
+    "source": [
+      "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_events.tsv",
+      "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_behav.mat",
+      "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_spmDesign.mat"
+    ],
+    "dest": [
+      "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_events.tsv",
+      "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_behav.mat",
+      "sub-{subject}/ses-{session}/func/sub-{subject}_ses-{session}_task-{task}_dir-{direction}_run-{run}_spmDesign.mat"
+    ]
+  },
+  "tasks": [
+    "xxx"
+  ],
+  "sessions": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08"
+  ],
+  "runs": [
+    "1",
+    "2"
+  ],
+  "directions": [
+    "AP",
+    "PA"
+  ]
+}
