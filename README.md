@@ -28,34 +28,26 @@ editing config and a small amount of code. See
 ```mermaid
 %%{init: {"flowchart": {"nodeSpacing": 40, "rankSpacing": 55, "curve": "basis", "useMaxWidth": true}} }%%
 flowchart TD
-    RAW[("<b>Raw scanner files</b><br/>DICOM · 10 TB+ · 1,000+ subjects")]
-    EP[("<b>Behavioural logs</b><br/>what the subject saw and did")]
-    ROI[("<b>Brain region masks</b><br/>one file per region")]
+    RAW[("Raw DICOM")]
+    EP[("Behavioural logs")]
+    ROI[("Brain region masks")]
 
-    S1["<b>Stage 1 — Prepare data</b><br/>📁 prepare_data/<br/> <br/>Catalogue which subjects and<br/>sessions exist, and turn behavioural<br/>logs into task timing<br/> <br/><i>one pass over the data tree</i>"]
-    MAP["<b>Subject + session list</b><br/> <br/>scan dates are used here,<br/>then never carried forward"]
-    EV["<b>Task timing files</b><br/> <br/>when each task block<br/>started and ended"]
+    S1["<b>1 · Prepare data</b><br/>prepare_data/<br/><i>single pass</i>"]
+    M1[("Subject list<br/>and task timing")]
 
-    S2["<b>Stage 2 — Convert to BIDS</b><br/>📁 BIDS_conversion/<br/> <br/>Convert scanner files to NIfTI images<br/>and arrange them into the standard<br/>BIDS folder layout<br/> <br/><i>one cluster job per subject-session</i>"]
-    BIDS[("<b>BIDS dataset</b><br/>built from symlinks,<br/>so the data is not duplicated")]
+    S2["<b>2 · Convert to BIDS</b><br/>BIDS_conversion/<br/><i>per subject-session</i>"]
+    M2[("BIDS dataset")]
 
-    S3["<b>Stage 3 — Preprocess</b><br/>📁 fMRIPrep_preprocessing/<br/> <br/>Correct head motion, align every brain<br/>to a common template, and measure<br/>known noise sources<br/> <br/><i>one cluster job per subject</i>"]
-    DER[("<b>Clean, aligned images</b><br/>+ noise measurements<br/>for each timepoint")]
+    S3["<b>3 · Preprocess</b><br/>fMRIPrep_preprocessing/<br/><i>per subject</i>"]
+    M3[("Preprocessed images<br/>and noise measures")]
 
-    S4["<b>Stage 4 — Extract timeseries</b><br/>📁 timeseries_extraction/<br/> <br/>Average the signal inside each brain<br/>region, subtract the noise, and save<br/>one file per session<br/> <br/><i>one cluster job per session,<br/>brain regions handled in parallel</i>"]
-    OUT[("<b>One file per session</b><br/>sub-ID_ses-NN_ts.npz<br/>runs × timepoints × regions")]
+    S4["<b>4 · Extract timeseries</b><br/>timeseries_extraction/<br/><i>per session, ROIs in parallel</i>"]
+    OUT[("ROI timeseries")]
 
     RAW --> S1
     EP --> S1
-    S1 --> MAP
-    S1 --> EV
-    RAW --> S2
-    MAP --> S2
-    EV --> S2
-    S2 --> BIDS --> S3 --> DER --> S4
-    EV -.-> S4
+    S1 --> M1 --> S2 --> M2 --> S3 --> M3 --> S4 --> OUT
     ROI --> S4
-    S4 --> OUT
 
     classDef src fill:#eef2f7,stroke:#64748b,color:#0f172a
     classDef stage fill:#dbeafe,stroke:#2563eb,color:#0f172a
@@ -64,7 +56,7 @@ flowchart TD
 
     class RAW,EP,ROI src
     class S1,S2,S3,S4 stage
-    class MAP,EV,BIDS,DER mid
+    class M1,M2,M3 mid
     class OUT out
 ```
 
