@@ -1,7 +1,7 @@
 # fMRI HPC Pipeline
 
 A four-stage pipeline that takes raw scanner DICOM output to denoised,
-ROI-averaged BOLD timeseries ready for downstream modelling. Built to run on a
+ROI-averaged BOLD timeseries ready for downstream modeling. Built to run on a
 Linux HPC cluster under SLURM.
 
 Operational scale: **10 TB+ of imaging data across 1,000+ subjects**, with
@@ -29,25 +29,31 @@ editing config and a small amount of code. See
 %%{init: {"flowchart": {"nodeSpacing": 40, "rankSpacing": 55, "curve": "basis", "useMaxWidth": true}} }%%
 flowchart TD
     RAW[("Raw DICOM")]
-    EP[("Behavioural logs")]
+    EP[("Behavioral logs")]
     ROI[("Brain region masks")]
 
-    S1["<b>1 · Prepare data</b><br/>prepare_data/<br/><i>single pass</i>"]
-    M1[("Subject list<br/>and task timing")]
+    S1["1 · Prepare data — prepare_data/"]
+    M1[("Subject list and task timing")]
 
-    S2["<b>2 · Convert to BIDS</b><br/>BIDS_conversion/<br/><i>per subject-session</i>"]
+    S2["2 · Convert to BIDS — BIDS_conversion/"]
     M2[("BIDS dataset")]
 
-    S3["<b>3 · Preprocess</b><br/>fMRIPrep_preprocessing/<br/><i>per subject</i>"]
-    M3[("Preprocessed images<br/>and noise measures")]
+    S3["3 · Preprocess — fMRIPrep_preprocessing/"]
+    M3[("Preprocessed images and noise measures")]
 
-    S4["<b>4 · Extract timeseries</b><br/>timeseries_extraction/<br/><i>per session, ROIs in parallel</i>"]
-    OUT[("ROI timeseries")]
+    S4["4 · Extract timeseries — timeseries_extraction/"]
+    OUT[("ROI timeseries, ready for downstream modeling")]
 
     RAW --> S1
     EP --> S1
-    S1 --> M1 --> S2 --> M2 --> S3 --> M3 --> S4 --> OUT
+    S1 --> M1
+    M1 -->|one job per subject-session| S2
+    S2 --> M2
+    M2 -->|one job per subject| S3
+    S3 --> M3
+    M3 -->|one job per session, ROIs in parallel| S4
     ROI --> S4
+    S4 --> OUT
 
     classDef src fill:#eef2f7,stroke:#64748b,color:#0f172a
     classDef stage fill:#dbeafe,stroke:#2563eb,color:#0f172a
@@ -93,7 +99,7 @@ behavioral data. A SLURM array covers subject-sessions while `joblib` fans out
 across ROIs within each task; BLAS threading is pinned to 1 so workers don't
 oversubscribe the allocated cores. Per ROI: mask, drop dummy scans from signal
 and confounds together, high-pass filter, regress out 6 motion parameters plus
-CSF and white matter, standardise, and average across voxels.
+CSF and white matter, standardize, and average across voxels.
 Output is one `.npz` per subject-session —
 see [`examples/output_format.md`](examples/output_format.md).
 
@@ -107,7 +113,7 @@ see [`examples/output_format.md`](examples/output_format.md).
 | Binaries | `dcm2niix`, `jq` |
 | Containers | fMRIPrep 24.1.1 (`.simg`) |
 | Validation | `bids-validator` 1.15.0 |
-| Licence | A FreeSurfer licence file, obtained separately. **Never commit it.** |
+| License | A FreeSurfer license file, obtained separately. **Never commit it.** |
 
 ## Configuration
 
@@ -204,7 +210,7 @@ QC figures.
 Structurally: every stage writes outputs to `$WORK_DIR` from the config, never
 into the repo; scan dates are consumed in stage 1 and never propagate into
 filenames; and `.gitignore` covers subject manifests, session maps, `.npz`,
-`.nii.gz`, `_events.tsv`, `sub-*/` trees, and the FreeSurfer licence.
+`.nii.gz`, `_events.tsv`, `sub-*/` trees, and the FreeSurfer license.
 
 ## Authors
 

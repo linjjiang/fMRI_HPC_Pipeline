@@ -129,7 +129,7 @@ workers each spawning N BLAS threads will thrash a node.
 
 Per ROI: resample the mask, binarise, extract voxels, drop dummy scans from
 signal and confounds together, high-pass filter and regress out motion + CSF +
-white matter, standardise, then average across voxels.
+white matter, standardize, then average across voxels.
 
 > **Limitation.** The mask step is an affine resample onto the functional voxel
 > grid, with no nonlinear transform. It is only correct for ROIs already defined

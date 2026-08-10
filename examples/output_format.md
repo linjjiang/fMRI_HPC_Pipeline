@@ -74,7 +74,7 @@ In `extract_timeseries()`, per ROI, in order:
 3. Extract per-voxel timeseries with `NiftiMasker`.
 4. Drop the first `DUMMY_SCANS` volumes from signal and confounds together.
 5. `signal.clean`: high-pass Butterworth at `HIGH_PASS` Hz, regress out 6 motion
-   parameters plus CSF and white-matter signal, then standardise.
+   parameters plus CSF and white-matter signal, then standardize.
 6. Average across voxels within the ROI.
 
 Step 4 dropping both signal and confounds together is what keeps the confound

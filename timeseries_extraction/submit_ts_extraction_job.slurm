@@ -3,7 +3,7 @@
 # Apr-01-2025
 #
 # Stage 4: submit one SLURM array task per subject-session for ROI timeseries
-# extraction. Each task runs run_extraction.py, which parallelises across ROIs
+# extraction. Each task runs run_extraction.py, which parallelizes across ROIs
 # with joblib.
 #
 # Usage:  bash submit_ts_extraction_job.slurm

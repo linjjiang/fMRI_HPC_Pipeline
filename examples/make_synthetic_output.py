@@ -66,7 +66,7 @@ def main():
 
     # run_extraction.py z-scores each ROI column via
     # nilearn.signal.clean(standardize=True), so synthetic data is drawn
-    # standard-normal and re-standardised to match.
+    # standard-normal and re-standardized to match.
     ts = rng.standard_normal((len(RUN_IDS), N_TIMEPOINTS, len(ROI_IDS)))
     ts = (ts - ts.mean(axis=1, keepdims=True)) / ts.std(axis=1, keepdims=True)
 
