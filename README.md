@@ -4,10 +4,6 @@ A four-stage pipeline that takes raw scanner DICOM output to denoised,
 ROI-averaged BOLD timeseries ready for downstream modeling. Built to run on a
 Linux HPC cluster under SLURM.
 
-Operational scale: **10 TB+ of imaging data across 1,000+ subjects**, with
-multiple sessions and two task runs per session. Parallelism is SLURM job
-arrays across subjects, plus `joblib` across ROIs within a subject.
-
 Written for my own and my lab's research use — not a general-purpose package.
 It targets a specific acquisition protocol, and adapting it to another one means
 editing config and a small amount of code. See
