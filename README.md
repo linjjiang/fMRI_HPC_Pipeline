@@ -26,42 +26,46 @@ editing config and a small amount of code. See
 ## Pipeline
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 40, "rankSpacing": 55, "curve": "basis", "useMaxWidth": true}} }%%
 flowchart TD
-    RAW[("Raw DICOM<br/>10 TB+ · 1,000+ subjects")]
-    EP[("Raw E-Prime<br/>behavioral logs")]
+    RAW[("<b>Raw DICOM</b><br/>10 TB+ · 1,000+ subjects")]
+    EP[("<b>Raw E-Prime logs</b>")]
+    ROI[("<b>ROI masks</b>")]
 
-    subgraph ST1["Stage 1 · prepare_data — serial tree scan"]
-        A1["gen_subjlist.sh<br/>gen_session_map.sh"]
-        A2["task_design.m<br/>→ _bids.m / _spm.m"]
-    end
+    S1["<b>Stage 1 · prepare_data</b><br/>subject list · session map · task design<br/><i>serial tree scan</i>"]
+    MAP["session map<br/>scan date → ses-NN, then dropped"]
+    EV["events.tsv<br/>onsets shifted −TR/2"]
 
-    subgraph ST2["Stage 2 · BIDS_conversion — SLURM array, 1 task per subject-session"]
-        B1["dcm2niix_func.sh"]
-        B2["symlink_nii_to_bids.sh<br/>symlink_behav_to_bids.sh"]
-    end
+    S2["<b>Stage 2 · BIDS_conversion</b><br/>dcm2niix, then BIDS layout by symlink<br/><i>SLURM array · 1 task per subject-session</i>"]
+    BIDS[("<b>BIDS dataset</b><br/>symlinks, not copies")]
 
-    subgraph ST3["Stage 3 · fMRIPrep_preprocessing — SLURM array, 1 task per subject"]
-        C1["singularity run fmriprep<br/>pinned container"]
-    end
+    S3["<b>Stage 3 · fMRIPrep_preprocessing</b><br/>containerised preprocessing<br/><i>SLURM array · 1 task per subject</i>"]
+    DER[("preprocessed BOLD · MNI152<br/>+ confounds.tsv")]
 
-    subgraph ST4["Stage 4 · timeseries_extraction — SLURM array × joblib over ROIs"]
-        D1["run_extraction.py"]
-    end
+    S4["<b>Stage 4 · timeseries_extraction</b><br/>mask · denoise · average<br/><i>SLURM array × joblib over ROIs</i>"]
+    OUT[("<b>sub-ID_ses-NN_ts.npz</b><br/>n_runs × n_timepoints × n_rois")]
 
-    ROI[("ROI mask set")]
-    OUT[("sub-ID_ses-NN_ts.npz<br/>n_runs × n_timepoints × n_rois")]
+    RAW --> S1
+    EP --> S1
+    S1 --> MAP
+    S1 --> EV
+    RAW --> S2
+    MAP --> S2
+    EV --> S2
+    S2 --> BIDS --> S3 --> DER --> S4
+    EV -.-> S4
+    ROI --> S4
+    S4 --> OUT
 
-    RAW --> A1
-    RAW --> B1
-    EP --> A2
-    A1 -->|"subject list + session map<br/>scan date → ses-NN, then dropped"| B1
-    B1 -->|"NIfTI + JSON sidecars"| B2
-    A2 -->|"events.tsv, onsets −TR/2"| B2
-    B2 -->|"BIDS dataset<br/>symlinks, not copies"| C1
-    C1 -->|"preproc BOLD in MNI152<br/>+ confounds.tsv"| D1
-    A2 -.->|"events.tsv"| D1
-    ROI --> D1
-    D1 --> OUT
+    classDef src fill:#eef2f7,stroke:#64748b,color:#0f172a
+    classDef stage fill:#dbeafe,stroke:#2563eb,color:#0f172a
+    classDef mid fill:#fef9c3,stroke:#ca8a04,color:#0f172a
+    classDef out fill:#dcfce7,stroke:#16a34a,color:#0f172a
+
+    class RAW,EP,ROI src
+    class S1,S2,S3,S4 stage
+    class MAP,EV,BIDS,DER mid
+    class OUT out
 ```
 
 ## The four stages
