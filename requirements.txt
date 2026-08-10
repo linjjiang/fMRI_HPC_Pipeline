@@ -1,0 +1,17 @@
+# Python dependencies for stage 4 (timeseries extraction) and the stage-1
+# subject-list helper. Versions are the ones the pipeline has been run with.
+#
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+#
+# Non-Python dependencies are not covered here: dcm2niix, jq, bids-validator,
+# Singularity/Apptainer, and the fMRIPrep container. See README.
+
+numpy>=1.26
+pandas>=2.0
+scipy>=1.11
+nibabel>=5.0
+nilearn>=0.10,<0.13   # run_extraction.py still imports the deprecated
+                      # nilearn.input_data; pin below its removal
+joblib>=1.3
+psutil>=5.9
