@@ -28,22 +28,22 @@ editing config and a small amount of code. See
 ```mermaid
 %%{init: {"flowchart": {"nodeSpacing": 40, "rankSpacing": 55, "curve": "basis", "useMaxWidth": true}} }%%
 flowchart TD
-    RAW[("<b>Raw DICOM</b><br/>10 TB+ · 1,000+ subjects")]
-    EP[("<b>Raw E-Prime logs</b>")]
-    ROI[("<b>ROI masks</b>")]
+    RAW[("<b>Raw scanner files</b><br/>DICOM · 10 TB+ · 1,000+ subjects")]
+    EP[("<b>Behavioural logs</b><br/>what the subject saw and did")]
+    ROI[("<b>Brain region masks</b><br/>one file per region")]
 
-    S1["<b>Stage 1 · prepare_data</b><br/>subject list · session map · task design<br/><i>serial tree scan</i>"]
-    MAP["session map<br/>scan date → ses-NN, then dropped"]
-    EV["events.tsv<br/>onsets shifted −TR/2"]
+    S1["<b>Stage 1 — Prepare data</b><br/>📁 prepare_data/<br/> <br/>Catalogue which subjects and<br/>sessions exist, and turn behavioural<br/>logs into task timing<br/> <br/><i>one pass over the data tree</i>"]
+    MAP["<b>Subject + session list</b><br/> <br/>scan dates are used here,<br/>then never carried forward"]
+    EV["<b>Task timing files</b><br/> <br/>when each task block<br/>started and ended"]
 
-    S2["<b>Stage 2 · BIDS_conversion</b><br/>dcm2niix, then BIDS layout by symlink<br/><i>SLURM array · 1 task per subject-session</i>"]
-    BIDS[("<b>BIDS dataset</b><br/>symlinks, not copies")]
+    S2["<b>Stage 2 — Convert to BIDS</b><br/>📁 BIDS_conversion/<br/> <br/>Convert scanner files to NIfTI images<br/>and arrange them into the standard<br/>BIDS folder layout<br/> <br/><i>one cluster job per subject-session</i>"]
+    BIDS[("<b>BIDS dataset</b><br/>built from symlinks,<br/>so the data is not duplicated")]
 
-    S3["<b>Stage 3 · fMRIPrep_preprocessing</b><br/>containerised preprocessing<br/><i>SLURM array · 1 task per subject</i>"]
-    DER[("preprocessed BOLD · MNI152<br/>+ confounds.tsv")]
+    S3["<b>Stage 3 — Preprocess</b><br/>📁 fMRIPrep_preprocessing/<br/> <br/>Correct head motion, align every brain<br/>to a common template, and measure<br/>known noise sources<br/> <br/><i>one cluster job per subject</i>"]
+    DER[("<b>Clean, aligned images</b><br/>+ noise measurements<br/>for each timepoint")]
 
-    S4["<b>Stage 4 · timeseries_extraction</b><br/>mask · denoise · average<br/><i>SLURM array × joblib over ROIs</i>"]
-    OUT[("<b>sub-ID_ses-NN_ts.npz</b><br/>n_runs × n_timepoints × n_rois")]
+    S4["<b>Stage 4 — Extract timeseries</b><br/>📁 timeseries_extraction/<br/> <br/>Average the signal inside each brain<br/>region, subtract the noise, and save<br/>one file per session<br/> <br/><i>one cluster job per session,<br/>brain regions handled in parallel</i>"]
+    OUT[("<b>One file per session</b><br/>sub-ID_ses-NN_ts.npz<br/>runs × timepoints × regions")]
 
     RAW --> S1
     EP --> S1
