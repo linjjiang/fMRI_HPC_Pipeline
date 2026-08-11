@@ -1,11 +1,11 @@
-# fMRI HPC Pipeline
+# Task fMRI HPC Pipeline
 
-A four-stage pipeline that takes raw scanner DICOM output to denoised,
-ROI-averaged BOLD timeseries ready for downstream modeling. Built to run on a
+A four-stage task fMRI pipeline that takes raw scanner DICOM output to denoised,
+ROI-specific BOLD timeseries ready for downstream modeling. Built to run on a
 Linux HPC cluster under SLURM.
 
-Written for my own and my lab's research use — not a general-purpose package.
-It targets a specific acquisition protocol, and adapting it to another one means
+This script package was originally written for my own and my lab's research use and can be easily adapted to general use.
+It targets a specific acquisition protocol, and adapting it to another one requires
 editing config and a small amount of code. See
 [Status and known limitations](#status-and-known-limitations).
 
@@ -64,7 +64,7 @@ flowchart TD
 
 ## The four stages
 
-**1. `prepare_data/` — subject lists and task design.**
+**1. `prepare_data/` — produce subject lists and task design.**
 Walks the raw DICOM tree to build the subject roster, and maps each subject's
 scan dates onto sequential session numbers. The scan date is used here and then
 dropped; everything downstream refers to `ses-01`, so a re-identifying calendar
@@ -73,31 +73,29 @@ tables and then into BIDS `_events.tsv` and SPM design files, with onsets shifte
 by `−TR/2` to match fMRIPrep's slice-timing reference.
 
 **2. `BIDS_conversion/` — DICOM to BIDS.**
-A SLURM array converts each subject-session with `dcm2niix`, one task per
+A SLURM array converts each subject-session DICOM data to NifTI format with `dcm2niix`, one task per
 session. A second pass lays the results out as a BIDS dataset using **symlinks
-rather than copies** — at 10 TB+ this avoids a second full copy of the dataset.
-Scanner-filename-to-BIDS-entity mapping is declared in
+rather than copies**. Scanner-filename-to-BIDS-entity mapping is declared in
 [`bids_mapping.json`](BIDS_conversion/nii2bids/bids_mapping.json), not hardcoded.
 JSON sidecars are copied instead of linked, because they are mutated: `TaskName`
 is injected, and fieldmap `IntendedFor` lists are built only from functional
 files that actually exist.
 
-**3. `fMRIPrep_preprocessing/` — preprocessing.**
+**3. `fMRIPrep_preprocessing/` — image preprocessing.**
 A SLURM array runs a pinned fMRIPrep container under Singularity, one task per
-subject, outputting to `MNI152NLin2009cAsym:res-2`. FreeSurfer surface
-reconstruction is skipped (`--fs-no-reconall`), which is the largest single time
-saving, since stage 4 needs only volumetric ROIs. `fmriprep_singleSubj.sh` runs
+subject, outputting to `MNI152NLin2009cAsym:res-2` space. FreeSurfer surface
+reconstruction is skipped (`--fs-no-reconall`) but can be turned on easily if you want to preprocess data in surface space in addition to volumetric space. `fmriprep_singleSubj.sh` runs
 one subject for debugging before committing an array.
 
-**4. `timeseries_extraction/` — denoised ROI timeseries.**
-Subjects are included only if they both completed preprocessing and have complete
-behavioral data. A SLURM array covers subject-sessions while `joblib` fans out
+**4. `timeseries_extraction/` — denoised ROI timeseries for downstream modeling.**
+A SLURM array converts preprocessed fMRI images to timeseries across ROIs, a feature easily usable by downstream modeling or analysis. subject-sessions while `joblib` fans out
 across ROIs within each task; BLAS threading is pinned to 1 so workers don't
 oversubscribe the allocated cores. Per ROI: mask, drop dummy scans from signal
 and confounds together, high-pass filter, regress out 6 motion parameters plus
 CSF and white matter, standardize, and average across voxels.
 Output is one `.npz` per subject-session —
-see [`examples/output_format.md`](examples/output_format.md).
+see [`examples/output_format.md`](examples/output_format.md). Note: Subjects are included only if they both completed preprocessing and have complete
+behavioral data. 
 
 ## Requirements
 
